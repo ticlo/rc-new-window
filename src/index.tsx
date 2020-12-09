@@ -1,5 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import debounce from 'lodash/debounce';
 
 interface Feature {
   width?: number;
@@ -14,9 +15,9 @@ interface Props {
   name?: string;
   title?: string;
   features?: Feature;
-  onUnload?: () => void;
-  onBlock?: () => void;
   onOpen?: (w: Window) => void;
+  onClose?: () => void;
+  onBlock?: () => void;
   center?: 'parent' | 'screen';
   copyStyles?: boolean;
 }
@@ -37,13 +38,12 @@ class NewWindow extends React.PureComponent<Props, State> {
   static defaultProps: Props = {
     url: '',
     name: '',
-    features: { width: 600, height: 600 },
+    features: { width: 640, height: 480 },
     copyStyles: true,
+    center: 'parent',
   };
 
   window: Window;
-
-  windowCheckerInterval: any;
 
   released = false;
 
@@ -113,17 +113,11 @@ class NewWindow extends React.PureComponent<Props, State> {
     // Open a new window.
     this.window = window.open(url, name, toWindowFeatures(features));
 
-    // When a new window use content from a cross-origin there's no way we can attach event
-    // to it. Therefore, we need to detect in a interval when the new window was destroyed
-    // or was closed.
-    this.windowCheckerInterval = setInterval(() => {
-      if (!this.window || this.window.closed) {
-        this.release();
-      }
-    }, 50);
-
-    // Check if the new window was succesfully opened.
+    // Check if the new window was successfully opened.
     if (this.window) {
+      window.addEventListener('beforeunload', this.onMainWindowUnload);
+      this.window.addEventListener('resize', this.onNewWindowResize);
+
       this.window.document.title = title;
       this.window.document.body.appendChild(this.container);
 
@@ -137,7 +131,7 @@ class NewWindow extends React.PureComponent<Props, State> {
       }
 
       // Release anything bound to this component before the new window unload.
-      this.window.addEventListener('beforeunload', () => this.release());
+      this.window.addEventListener('beforeunload', this.release);
     } else {
       // Handle error on opening of new window.
       if (typeof onBlock === 'function') {
@@ -148,11 +142,27 @@ class NewWindow extends React.PureComponent<Props, State> {
     }
   }
 
+  onMainWindowUnload = () => {
+    if (this.window) {
+      this.onNewWindowResize.cancel();
+      this.window.close();
+    }
+  };
+
+  onNewWindowResize = debounce(() => {
+    // add/remove element on main document, force it to dispatch resize observer event on the popup window
+    let div = document.createElement('div');
+    document.body.append(div);
+    div.remove();
+    // TODO update resize event
+  }, 200);
+
   /**
    * Close the opened window (if any) when NewWindow will unmount.
    */
   componentWillUnmount() {
     if (this.window) {
+      this.release();
       this.window.close();
     }
   }
@@ -160,23 +170,25 @@ class NewWindow extends React.PureComponent<Props, State> {
   /**
    * Release the new window and anything that was bound to it.
    */
-  release() {
+  release = (event?: Event) => {
     // This method can be called once.
     if (this.released) {
       return;
     }
     this.released = true;
 
-    // Remove checker interval.
-    clearInterval(this.windowCheckerInterval);
+    window.removeEventListener('beforeunload', this.onMainWindowUnload);
+    this.window.addEventListener('beforeunload', this.release);
 
-    // Call any function bound to the `onUnload` prop.
-    const { onUnload } = this.props;
+    if (event) {
+      // Call any function bound to the `onUnload` prop.
+      const { onClose } = this.props;
 
-    if (typeof onUnload === 'function') {
-      onUnload();
+      if (typeof onClose === 'function') {
+        onClose();
+      }
     }
-  }
+  };
 }
 
 /**

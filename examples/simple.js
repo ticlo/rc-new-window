@@ -6,8 +6,8 @@ export default () => {
 
   return (
     <>
-      <button onClick={() => setOpen(true)}>Open Window</button>
-      {open ? <NewWindow onUnload={() => setOpen(false)}>hello</NewWindow> : null}
+      <button onClick={() => setOpen(v => !v)}>Open/Close Window</button>
+      {open ? <NewWindow onClose={() => setOpen(false)}>hello</NewWindow> : null}
     </>
   );
 };
