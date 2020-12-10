@@ -14,17 +14,27 @@ interface Props {
   url?: string;
   name?: string;
   title?: string;
-  features?: Feature;
+  width?: number;
+  height?: number;
+  left?: number;
+  top?: number;
   onOpen?: (w: Window) => void;
   onClose?: () => void;
   onBlock?: () => void;
-  center?: 'parent' | 'screen';
   copyStyles?: boolean;
 }
 
 interface State {
   mounted: boolean;
 }
+
+const onNewWindowResize = debounce(() => {
+  // add/remove element on main document, force it to dispatch resize observer event on the popup window
+  let div = document.createElement('div');
+  document.body.append(div);
+  div.remove();
+  // TODO update resize event
+}, 200);
 
 /**
  * The NewWindow class object.
@@ -38,9 +48,9 @@ class NewWindow extends React.PureComponent<Props, State> {
   static defaultProps: Props = {
     url: '',
     name: '',
-    features: { width: 640, height: 480 },
+    width: 640,
+    height: 480,
     copyStyles: true,
-    center: 'parent',
   };
 
   window: Window;
@@ -76,38 +86,12 @@ class NewWindow extends React.PureComponent<Props, State> {
    * Create the new window when NewWindow component mount.
    */
   openChild() {
-    const { url, title, name, features, onBlock, onOpen, center } = this.props;
+    const { url, title, name, left, top, width, height, onBlock, onOpen } = this.props;
 
-    // Prepare position of the new window to be centered against the 'parent' window or 'screen'.
-    if (
-      typeof center === 'string' &&
-      (features.width === undefined || features.height === undefined)
-    ) {
-      console.warn(
-        'width and height window features must be present when a center prop is provided',
-      );
-    } else if (center === 'parent') {
-      features.left = window.top.outerWidth / 2 + window.top.screenX - features.width / 2;
-      features.top = window.top.outerHeight / 2 + window.top.screenY - features.height / 2;
-    } else if (center === 'screen') {
-      const screenLeft =
-        window.screenLeft !== undefined ? window.screenLeft : (window.screen as any).left;
-      const screenTop =
-        window.screenTop !== undefined ? window.screenTop : (window.screen as any).top;
-
-      const width = window.innerWidth
-        ? window.innerWidth
-        : document.documentElement.clientWidth
-        ? document.documentElement.clientWidth
-        : window.screen.width;
-      const height = window.innerHeight
-        ? window.innerHeight
-        : document.documentElement.clientHeight
-        ? document.documentElement.clientHeight
-        : window.screen.height;
-
-      features.left = width / 2 - features.width / 2 + screenLeft;
-      features.top = height / 2 - features.height / 2 + screenTop;
+    const features = { left, top, width, height };
+    if (left == null || top == null) {
+      features.left = window.top.outerWidth / 2 + window.top.screenX - width / 2;
+      features.top = window.top.outerHeight / 2 + window.top.screenY - height / 2;
     }
 
     // Open a new window.
@@ -116,9 +100,9 @@ class NewWindow extends React.PureComponent<Props, State> {
     // Check if the new window was successfully opened.
     if (this.window) {
       window.addEventListener('beforeunload', this.onMainWindowUnload);
-      this.window.addEventListener('resize', this.onNewWindowResize);
+      this.window.addEventListener('resize', onNewWindowResize);
 
-      this.window.document.title = title;
+      this.window.document.title = title || document.title;
       this.window.document.body.appendChild(this.container);
 
       // If specified, copy styles from parent window's document.
@@ -144,18 +128,9 @@ class NewWindow extends React.PureComponent<Props, State> {
 
   onMainWindowUnload = () => {
     if (this.window) {
-      this.onNewWindowResize.cancel();
       this.window.close();
     }
   };
-
-  onNewWindowResize = debounce(() => {
-    // add/remove element on main document, force it to dispatch resize observer event on the popup window
-    let div = document.createElement('div');
-    document.body.append(div);
-    div.remove();
-    // TODO update resize event
-  }, 200);
 
   /**
    * Close the opened window (if any) when NewWindow will unmount.
