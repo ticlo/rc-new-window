@@ -23,7 +23,7 @@ npm start
 ## Example
 
 
-online example: http://ticlo.github.io/rc-new-window
+online example: https://ticlo.github.io/rc-new-window/
 
 
 
