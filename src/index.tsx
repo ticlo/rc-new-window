@@ -16,8 +16,7 @@ interface Props {
   title?: string;
   width?: number;
   height?: number;
-  left?: number;
-  top?: number;
+  initPosition?: () => Feature;
   onOpen?: (w: Window) => void;
   onClose?: () => void;
   onBlock?: () => void;
@@ -86,10 +85,13 @@ class NewWindow extends React.PureComponent<Props, State> {
    * Create the new window when NewWindow component mount.
    */
   openChild() {
-    const { url, title, name, left, top, width, height, onBlock, onOpen } = this.props;
+    const { url, title, name, width, height, initPosition, onBlock, onOpen } = this.props;
 
-    const features = { left, top, width, height };
-    if (left == null || top == null) {
+    let features: Feature = { width, height };
+
+    if (initPosition) {
+      features = initPosition();
+    } else {
       features.left = window.top.outerWidth / 2 + window.top.screenX - width / 2;
       features.top = window.top.outerHeight / 2 + window.top.screenY - height / 2;
     }

@@ -96,10 +96,10 @@ ReactDOM.render((
           <td>Window inner height</td>
         </tr>
         <tr>
-          <td>left</td>
-          <td>Number</td>
-          <td>center of current window</td>
-          <td>Window position</td>
+          <td>initPosition</td>
+          <td>Function</td>
+          <td></td>
+          <td>return {left,top,width,height}</td>
         </tr>
         <tr>
           <td>top</td>
