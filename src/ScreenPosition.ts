@@ -1,7 +1,9 @@
+import { popupWindowBorder } from './BrowserPopupWindow';
+
 export function estimateBrowserZoom(_window: Window): number {
   // one of them might be off by a lot due to developer console or other browser plugin
   let xRatio = (_window.outerWidth - 8) / _window.innerWidth;
-  let yRatio = (_window.outerHeight - 85) / _window.innerHeight;
+  let yRatio = (_window.outerHeight - 80) / _window.innerHeight;
 
   let zoomRatio = Math.min(yRatio, xRatio);
   if (zoomRatio > 1.8) {
@@ -18,15 +20,12 @@ export function estimateWindowBorder(
   _window: Window,
   addBorder: boolean = false,
 ): [number, number, number] {
-  let zoom = estimateBrowserZoom(_window);
+  let zoom = _window ? estimateBrowserZoom(_window) : 1;
   let xBorder = (_window.outerWidth - _window.innerWidth * zoom) >> 1;
   let yBorder = Math.round(_window.outerHeight - _window.innerHeight * zoom);
   if (xBorder > 32) {
-    // probably because of debugger console, assume it's in the right side, so left side border is 8
+    // probably because of debugger console, assume it's in the right side
     xBorder = 8;
-  } else if (xBorder <= 4 && addBorder) {
-    xBorder = 8;
-    yBorder += 8;
   } else {
     yBorder -= xBorder;
   }
@@ -38,14 +37,14 @@ interface Pt {
   y: number;
 }
 
-export interface Rect {
+interface Rect {
   left: number;
   top: number;
   width: number;
   height: number;
 }
 
-export class MapRect2D {
+class MapRect2D {
   scaleX: number;
   scaleY: number;
   offsetX: number;
@@ -76,19 +75,15 @@ export class MapRect2D {
   }
 }
 
-export function mapElementToScreenRect(
-  element: HTMLElement,
-  rect?: Rect,
-  addBorder: boolean = true,
-): Rect {
+export function mapElementToScreenRect(element: HTMLElement, rect?: Rect): Rect {
   if (!element) {
     return null;
   }
   let clientRect = element.getBoundingClientRect();
   let mapRect = new MapRect2D();
   mapRect.init(
-    element.offsetLeft,
-    element.offsetTop,
+    0,
+    0,
     element.offsetWidth,
     element.offsetHeight,
     clientRect.x,
@@ -116,9 +111,9 @@ export function mapElementToScreenRect(
   }
   // recursively get rect if it's an iframe
   if (_window.frameElement) {
-    return mapElementToScreenRect(_window.frameElement as HTMLElement, mappedRect, addBorder);
+    return mapElementToScreenRect(_window.frameElement as HTMLElement, mappedRect);
   }
-  let [xBorder, yBorder, zoom] = estimateWindowBorder(_window, false);
+  let [xBorder, yBorder, zoom] = estimateWindowBorder(_window);
   if (zoom !== 1) {
     mappedRect.left *= zoom;
     mappedRect.top *= zoom;
@@ -128,9 +123,77 @@ export function mapElementToScreenRect(
 
   mappedRect.left += _window.screenX + xBorder;
   mappedRect.top += _window.screenY + yBorder;
-  if (addBorder) {
-    mappedRect.left -= 8;
-    mappedRect.top -= 60;
+
+  return mappedRect;
+}
+
+export function mapWindowToElement(
+  targetElement: HTMLElement,
+  fromWindow?: Window,
+  fromRect?: Rect,
+  removeBorder: boolean = true,
+): Rect {
+  if (!targetElement) {
+    return null;
   }
+  if (fromWindow) {
+    fromRect = {
+      left: fromWindow.screenX,
+      top: fromWindow.screenY,
+      width: fromWindow.outerWidth,
+      height: fromWindow.outerHeight,
+    };
+    if (removeBorder) {
+      const [topBorder, sideBorder, bottomBorder] = popupWindowBorder;
+      fromRect.left += sideBorder;
+      fromRect.top += topBorder;
+      fromRect.width -= sideBorder * 2;
+      fromRect.height -= topBorder + bottomBorder;
+    }
+  } else if (!fromRect) {
+    return null;
+  }
+  let _document = targetElement.ownerDocument;
+  let _window = _document.defaultView;
+  if (!_window) {
+    return fromRect;
+  }
+  // recursively get rect if it's an iframe
+  if (_window.frameElement) {
+    fromRect = mapWindowToElement(_window.frameElement as HTMLElement, null, fromRect);
+  } else {
+    let [xBorder, yBorder, zoom] = estimateWindowBorder(_window);
+    fromRect.left -= _window.screenX + xBorder;
+    fromRect.top -= _window.screenY + yBorder;
+
+    if (zoom !== 1) {
+      fromRect.left /= zoom;
+      fromRect.top /= zoom;
+      fromRect.width /= zoom;
+      fromRect.height /= zoom;
+    }
+  }
+
+  let clientRect = targetElement.getBoundingClientRect();
+  let mapRect = new MapRect2D();
+  mapRect.init(
+    0,
+    0,
+    targetElement.offsetWidth,
+    targetElement.offsetHeight,
+    clientRect.x,
+    clientRect.y,
+    clientRect.width,
+    clientRect.height,
+  );
+  let mappedRect: Rect;
+
+  let { x, y } = mapRect.revertMap({ x: fromRect.left, y: fromRect.top });
+  let { x: x2, y: y2 } = mapRect.revertMap({
+    x: fromRect.left + fromRect.width,
+    y: fromRect.top + fromRect.height,
+  });
+  mappedRect = { left: x, top: y, width: x2 - x, height: y2 - y };
+
   return mappedRect;
 }

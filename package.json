@@ -1,6 +1,6 @@
 {
   "name": "rc-new-window",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "popup new browser window with react",
   "keywords": [
     "react",
@@ -39,6 +39,7 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.10.1",
+    "bowser": "^2.11.0",
     "classnames": "2.x",
     "lodash": "^4.17.20"
   },

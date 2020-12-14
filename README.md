@@ -96,10 +96,16 @@ ReactDOM.render((
           <td>Window inner height</td>
         </tr>
         <tr>
-          <td>initPosition</td>
+          <td>initPopupInnerRect</td>
           <td>Function</td>
           <td></td>
-          <td>return {left,top,width,height}</td>
+          <td>init the window client area<br/>return {left,top,width,height}</td>
+        </tr>
+        <tr>
+          <td>initPopupOuterRect</td>
+          <td>Function</td>
+          <td></td>
+          <td>init the window position and size<br/>return {left,top,width,height}</td>
         </tr>
         <tr>
           <td>top</td>

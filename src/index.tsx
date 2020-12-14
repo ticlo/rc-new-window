@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import debounce from 'lodash/debounce';
+import { popupSupported, popupWindowBorder } from './BrowserPopupWindow';
 
 interface Feature {
   width?: number;
@@ -16,7 +17,8 @@ interface Props {
   title?: string;
   width?: number;
   height?: number;
-  initPosition?: () => Feature;
+  initPopupInnerRect?: () => Feature;
+  initPopupOuterRect?: () => Feature;
   onOpen?: (w: Window) => void;
   onClose?: () => void;
   onBlock?: () => void;
@@ -41,6 +43,7 @@ const onNewWindowResize = debounce(() => {
  */
 
 class NewWindow extends React.PureComponent<Props, State> {
+  static supported = popupSupported;
   /**
    * NewWindow default props.
    */
@@ -85,12 +88,30 @@ class NewWindow extends React.PureComponent<Props, State> {
    * Create the new window when NewWindow component mount.
    */
   openChild() {
-    const { url, title, name, width, height, initPosition, onBlock, onOpen } = this.props;
+    const {
+      url,
+      title,
+      name,
+      width,
+      height,
+      initPopupInnerRect,
+      initPopupOuterRect,
+      onBlock,
+      onOpen,
+    } = this.props;
 
     let features: Feature = { width, height };
 
-    if (initPosition) {
-      features = initPosition();
+    if (initPopupOuterRect) {
+      features = initPopupOuterRect();
+      const [topBorder, sideBorder, bottomBorder] = popupWindowBorder;
+      features.width -= sideBorder * 2;
+      features.height -= topBorder + bottomBorder;
+    } else if (initPopupInnerRect) {
+      features = initPopupInnerRect();
+      const [topBorder, sideBorder] = popupWindowBorder;
+      features.left -= sideBorder;
+      features.top -= topBorder;
     } else {
       features.left = window.top.outerWidth / 2 + window.top.screenX - width / 2;
       features.top = window.top.outerHeight / 2 + window.top.screenY - height / 2;
