@@ -12,14 +12,13 @@ export default () => {
     <>
       <button onClick={() => setOpen(v => !v)}>Open/Close Window</button>
       <p>
-        Popup should open with same position and size as the blue rectangle, even with browser zoom
-        or element scaling.
+        Popup should open with same position and size as the blue rectangle, even with browser zoom, element scaling or iframe.
       </p>
       <div ref={ref} style={{ width: 300, height: 300, background: '#CCCCFF' }}>
         hello
       </div>
       {open ? (
-        <NewWindow onClose={() => setOpen(false)} initPosition={initPosition}>
+        <NewWindow onClose={() => setOpen(false)} initPopupInnerRect={initPosition}>
           <div>hello</div>
         </NewWindow>
       ) : null}
