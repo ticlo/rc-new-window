@@ -1,9 +1,15 @@
-import { popupWindowBorder } from './BrowserPopupWindow';
+import { gerWindowBorder, popupWindowBorder } from './BrowserPopupWindow';
 
 export function estimateBrowserZoom(_window: Window): number {
   // one of them might be off by a lot due to developer console or other browser plugin
-  let xRatio = (_window.outerWidth - 8) / _window.innerWidth;
-  let yRatio = (_window.outerHeight - 80) / _window.innerHeight;
+
+  let [topBorder, sideBorder, bottomBorder] = gerWindowBorder();
+  if (_window.outerWidth === _window.screen.availWidth) {
+    sideBorder = 0;
+    bottomBorder = 0;
+  }
+  let xRatio = (_window.outerWidth - sideBorder * 2) / _window.innerWidth;
+  let yRatio = (_window.outerHeight - topBorder - bottomBorder) / _window.innerHeight;
 
   let zoomRatio = Math.min(yRatio, xRatio);
   if (zoomRatio > 1.8) {
@@ -13,6 +19,7 @@ export function estimateBrowserZoom(_window: Window): number {
   } else {
     zoomRatio = 2 / Math.round(2 / zoomRatio);
   }
+  console.log(`zoom ${zoomRatio}`);
   return zoomRatio;
 }
 

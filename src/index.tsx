@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import debounce from 'lodash/debounce';
-import { popupSupported, popupWindowBorder } from './BrowserPopupWindow';
+import { isSafari, popupSupported, popupWindowBorder } from './BrowserPopupWindow';
 
 interface Feature {
   width?: number;
@@ -105,13 +105,18 @@ class NewWindow extends React.PureComponent<Props, State> {
     if (initPopupOuterRect) {
       features = initPopupOuterRect();
       const [topBorder, sideBorder, bottomBorder] = popupWindowBorder;
-      features.width -= sideBorder * 2;
-      features.height -= topBorder + bottomBorder;
+      if (!isSafari) {
+        features.width -= sideBorder * 2;
+        features.height -= topBorder + bottomBorder;
+      }
     } else if (initPopupInnerRect) {
       features = initPopupInnerRect();
       const [topBorder, sideBorder] = popupWindowBorder;
       features.left -= sideBorder;
       features.top -= topBorder;
+      if (isSafari) {
+        features.height += topBorder;
+      }
     } else {
       features.left = window.top.outerWidth / 2 + window.top.screenX - width / 2;
       features.top = window.top.outerHeight / 2 + window.top.screenY - height / 2;

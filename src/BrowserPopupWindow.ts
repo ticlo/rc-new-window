@@ -7,10 +7,10 @@ export function gerWindowBorder(): [number, number, number] {
     case 'windows': {
       let result: [number, number, number];
       switch (browser.getBrowserName(true)) {
-        case 'firefox' :
+        case 'firefox':
           result = [68, 8, 8];
           break;
-        case 'microsoft edge' :
+        case 'microsoft edge':
           result = [62, 8, 8];
           break;
         //case 'chrome':
@@ -26,9 +26,9 @@ export function gerWindowBorder(): [number, number, number] {
     }
     case 'macos': {
       switch (browser.getBrowserName(true)) {
-        case 'safari' :
+        case 'safari':
           return [22, 0, 0];
-        case 'firefox' :
+        case 'firefox':
           return [59, 0, 0];
         //case 'chrome':
         default:
@@ -39,6 +39,6 @@ export function gerWindowBorder(): [number, number, number] {
   return [60, 8, 8];
 }
 
-
+export const isSafari = browser.getBrowserName(true) === 'safari';
 export const popupSupported = browser.getPlatformType() === 'desktop';
 export const popupWindowBorder = gerWindowBorder();
