@@ -1,4 +1,4 @@
-import * as Bowser from 'bowser';
+import Bowser from 'bowser';
 
 const browser = Bowser.getParser(window.navigator.userAgent);
 
