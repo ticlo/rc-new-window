@@ -1,6 +1,10 @@
 # History
 ----
 
+## 0.1.6 / 2021-02-23
+
+- fix es module
+
 ## 0.1.3 / 2020-12-18
 
 - fix safari window position and size issue 
