@@ -63,7 +63,7 @@ ReactDOM.render((
           <td>url</td>
           <td>String</td>
           <td></td>
-          <td>Use url instead of children content<br/>If cross domain url is used, callbacks might not work</td>
+          <td>Use url instead of children content<br/><b>When url is defined, callbacks might not work</b></td>
         </tr>
         <tr>
           <td>name</td>
@@ -123,7 +123,7 @@ ReactDOM.render((
           <td>onClose</td>
           <td>() => void</td>
           <td></td>
-          <td>callback when window is closed by user<br>This doesn't work if url is defined</td>
+          <td></td>
         </tr>
         <tr>
           <td>onBlock</td>

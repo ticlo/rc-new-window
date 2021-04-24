@@ -1,6 +1,6 @@
 {
   "name": "rc-new-window",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "description": "popup new browser window with react",
   "keywords": [
     "react",
