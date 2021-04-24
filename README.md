@@ -123,7 +123,7 @@ ReactDOM.render((
           <td>onClose</td>
           <td>() => void</td>
           <td></td>
-          <td>callback when window is closed by user</td>
+          <td>callback when window is closed by user<br>This doesn't work if url is defined</td>
         </tr>
         <tr>
           <td>onBlock</td>

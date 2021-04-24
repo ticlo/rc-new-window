@@ -181,7 +181,7 @@ class NewWindow extends React.PureComponent<Props, State> {
     this.released = true;
 
     window.removeEventListener('beforeunload', this.onMainWindowUnload);
-    this.window.addEventListener('beforeunload', this.release);
+    this.window.removeEventListener('beforeunload', this.release);
 
     if (event) {
       // Call any function bound to the `onUnload` prop.
