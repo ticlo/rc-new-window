@@ -123,7 +123,7 @@ ReactDOM.render((
           <td>onClose</td>
           <td>() => void</td>
           <td></td>
-          <td></td>
+          <td>callback when window is closed</td>
         </tr>
         <tr>
           <td>onBlock</td>
