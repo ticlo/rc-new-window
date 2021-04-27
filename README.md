@@ -63,7 +63,7 @@ ReactDOM.render((
           <td>url</td>
           <td>String</td>
           <td></td>
-          <td>Use url instead of children content<br/><b>When url is defined, callbacks might not work</b></td>
+          <td>Use url instead of children content</td>
         </tr>
         <tr>
           <td>name</td>
