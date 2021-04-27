@@ -59,6 +59,8 @@ class NewWindow extends React.PureComponent<Props, State> {
 
   released = false;
 
+  windowCheckerInterval: any;
+
   container = document.createElement('div');
 
   state: State = { mounted: false };
@@ -98,6 +100,7 @@ class NewWindow extends React.PureComponent<Props, State> {
       initPopupOuterRect,
       onBlock,
       onOpen,
+      onClose,
     } = this.props;
 
     let features: Feature = { width, height };
@@ -142,6 +145,14 @@ class NewWindow extends React.PureComponent<Props, State> {
         onOpen(this.window);
       }
 
+      if (url && onClose) {
+        this.windowCheckerInterval = setInterval(() => {
+          if (!this.window || this.window.closed) {
+            this.release(true);
+          }
+        }, 50);
+      }
+
       // Release anything bound to this component before the new window unload.
       this.window.addEventListener('beforeunload', this.release);
     } else {
@@ -173,12 +184,17 @@ class NewWindow extends React.PureComponent<Props, State> {
   /**
    * Release the new window and anything that was bound to it.
    */
-  release = (event?: Event) => {
+  release = (event?: any) => {
     // This method can be called once.
     if (this.released) {
       return;
     }
     this.released = true;
+
+    if (this.windowCheckerInterval) {
+      clearInterval(this.windowCheckerInterval);
+      this.windowCheckerInterval = null;
+    }
 
     window.removeEventListener('beforeunload', this.onMainWindowUnload);
     this.window.removeEventListener('beforeunload', this.release);
