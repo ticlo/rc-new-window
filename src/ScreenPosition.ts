@@ -19,7 +19,6 @@ export function estimateBrowserZoom(_window: Window): number {
   } else {
     zoomRatio = 2 / Math.round(2 / zoomRatio);
   }
-  console.log(`zoom ${zoomRatio}`);
   return zoomRatio;
 }
 
