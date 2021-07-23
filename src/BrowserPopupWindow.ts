@@ -1,9 +1,9 @@
 import Bowser from 'bowser';
 
-const browser = Bowser.getParser(window.navigator.userAgent);
+const browser = window && Bowser.getParser(window.navigator.userAgent);
 
 export function gerWindowBorder(): [number, number, number] {
-  switch (browser.getOSName(true)) {
+  switch (browser?.getOSName(true)) {
     case 'windows': {
       let result: [number, number, number];
       switch (browser.getBrowserName(true)) {
@@ -39,6 +39,6 @@ export function gerWindowBorder(): [number, number, number] {
   return [60, 8, 8];
 }
 
-export const isSafari = browser.getBrowserName(true) === 'safari';
-export const popupSupported = browser.getPlatformType() === 'desktop';
+export const isSafari = browser?.getBrowserName(true) === 'safari';
+export const popupSupported = browser?.getPlatformType() === 'desktop';
 export const popupWindowBorder = gerWindowBorder();
