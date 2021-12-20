@@ -1,6 +1,6 @@
 import Bowser from 'bowser';
 
-const browser = typeof window === 'object' && Bowser.getParser(window.navigator.userAgent);
+const browser = typeof window === 'object' ? Bowser.getParser(window.navigator.userAgent) : null;
 
 export function gerWindowBorder(): [number, number, number] {
   switch (browser?.getOSName(true)) {
